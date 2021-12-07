@@ -47,70 +47,68 @@ def search_bits(arr):
             best_ones.insert(0, (binary, matches))
     print(best_ones)
 
+def compare_bit_counts(zeros, ones, is_oxygen):
+    if(is_oxygen):
+        return (zeros > ones)
 
-def search_bits_radix(arr):
-    bitstrings = [bits for bits in arr]
-    bad_indexes = []
-    #for each column
-    for i in range(len(arr[0])):
-        if(len(bitstrings) == 1):
-            break
 
-        balance = 0
-        # for each row
-        for j in range(len(arr)):
-            if j in bad_indexes:
-                continue
-            
-            # if 0, minus 1, if 1 add 1
-            # whether its greater or less than 0 dictates whether its 0 or 1
-            if(arr[j][i] == "0"):
-                balance -= 1
-            elif(arr[j][i] == "1"):
-                balance += 1
+def search_bits_fast(arr, is_oxygen=True):
+    
+    candidates = arr.copy()
+    digits = ""
+    #every bitstring is the same length
+    str_len = len(arr[0])
+    for col in range(str_len):
+        #print(candidates)
+        new_arr = []
+        zeros = 0
+        ones = 0
+        for row in range(len(candidates)):
+            if(candidates[row][col] == "0"):
+                zeros += 1
+            elif(candidates[row][col] == "1"):
+                ones += 1
 
-        
-        to_delete = []
-        print(f"Balance: {balance}")
-        if(balance > 0):
-            print(f"1 is most significant")
-            # 1 is the most significant
 
-            # delete all bitstrings with 0 at this column
-            
-            for row in range(len(bitstrings)):
-                bitstring = bitstrings[row]
-                print(f"Looking at {bitstring}")
-                print(f"(col {i}) {bitstring[i]} == 0 {bitstring[i] == '0'}")
-                if(bitstring[i] == "0"):
-                    to_delete.append(bitstring)
-                    bad_indexes.append(row)
-            
-        elif(balance < 0):
-            print(f"0 is most significant")
-            # 0 is the most significant
-
-            # delete all bitstrings with 1 at this column 
-            for row in range(len(bitstrings)):
-                bitstring = bitstrings[row]
-                print(f"Looking at {bitstring}")
-                print(f"(col {i}) {bitstring[i]} == 1 {bitstring[i] == '1'}")
-                if(bitstring[i] == "1"):
-                    to_delete.append(bitstring)
-                    bad_indexes.append(row)
+        sig_bit = ""
+        #print(f"for column {col}: {zeros},{ones}")
+        if(zeros == ones):
+            #print("zeros are equal to ones")
+            if(is_oxygen):
+                sig_bit = "1"
+            else:
+                sig_bit = "0"
         else:
-            print("UHHHHHHH")
+            if(is_oxygen):
+                sig_bit = "0" if max(zeros, ones) == zeros else "1"
+            else:
+                sig_bit = "0" if min(zeros, ones) == zeros else "1"
+                
+        digits += sig_bit
 
-        print(bitstrings)
-        for item in to_delete:
+        #print(f"Significant bit for column {col} is {sig_bit}")
+        for i in range(len(candidates)):
             
-            bitstrings.remove(item)
-        print(bitstrings)
+
+            if(candidates[i][col] == sig_bit):
+                if(digits != candidates[i][0:len(digits)]):
+                    print(f"Problem here: {candidates[i]}")
+                new_arr.append(candidates[i])
+        candidates = new_arr.copy()
         
-        print(f"Current List of bitstrings: {bitstrings}")
+        if(len(candidates) == 1):
+            break
+    
 
-    print(f"Final String from Search: {bitstrings}")
-
+    if(len(candidates) == 1):
+        if(is_oxygen):
+            print(f"Oxygen Rating Bitstring: {candidates[0]}")
+        else:
+            print(f"CO2 Rating Bitstring: {candidates[0]}")
+    else:
+        print(f"failed; Elements remaining {candidates}")
+    print(f"Bits: {digits}")
+    
 
 
 
@@ -125,7 +123,11 @@ def read_input(inputfile):
 
 def main():
     input_arr = read_input("input_day3.txt")
-    search_bits_radix(input_arr)
+    #print("H")
+    #print(input_arr)
+    search_bits_fast(input_arr, is_oxygen=True)
+    search_bits_fast(input_arr, is_oxygen=False)
+    #search_bits_radix(input_arr)
 
 
 
